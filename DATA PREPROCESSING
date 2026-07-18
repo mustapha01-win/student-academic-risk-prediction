@@ -1,0 +1,64 @@
+
+import pandas as pdimport numpy as np
+from sklearn.model_selection import train_test_splitfrom sklearn.preprocessing import StandardScaler, LabelEncoderfrom sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix, classification_report
+)
+from imblearn.over_sampling import SMOTE
+
+
+mooc_df = pd.read_csv("mooc_dataset.csv")
+
+mooc_df = mooc_df.drop(columns=[
+    "index", "userid_DI", "course_id",
+    "final_cc_cname_DI", "start_time_DI",
+    "last_event_DI", "grade"
+])
+
+mooc_df = mooc_df.apply(pd.to_numeric, errors="coerce")
+mooc_df = mooc_df.fillna(0)
+
+X_mooc = mooc_df.drop(columns=["certified"])
+y_mooc = mooc_df["certified"]
+
+
+uci_df = pd.read_csv("uci_student.csv")
+
+features = ["G1", "G2", "studytime", "absences"]
+target = "G3"
+
+uci_df[features] = uci_df[features].fillna(0)
+
+X_uci = uci_df[features]
+y_uci = (uci_df[target] < 10).astype(int)
+
+
+q_df = pd.read_csv("questionnaire.csv")
+
+binary_cols = [
+    "Displaced","Educational special needs","Debtor",
+    "Tuition fees up to date","Gender",
+    "Scholarship holder","International"
+]
+for col in binary_cols:
+    q_df[col] = q_df[col].map({1:1, 0:0}).fillna(0)
+
+categorical_cols = [
+    "Marital status","Application mode","Course",
+    "Daytime/evening attendance","Previous qualification",
+    "Nationality","Mother's qualification","Father's qualification",
+    "Mother's occupation","Father's occupation"
+]
+
+q_df = pd.get_dummies(q_df, columns=categorical_cols)
+
+X_q = q_df.drop(columns=["Target"])
+y_q = q_df["Target"]
+
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_mooc, y_mooc, test_size=0.2, random_state=42, stratify=y_mooc
+)
+
+smote = SMOTE(random_state=42)
+X_train_sm, y_train_sm = smote.fit_resample(X_train, y_train)
