@@ -1,0 +1,12 @@
+from flask import Flask, render_template, requestimport joblibimport numpy as npfrom tensorflow.keras.models import load_model
+
+app = Flask(__name__)
+
+rf_model = joblib.load("rf_model.pkl")
+lstm_model = load_model("lstm_model.h5")
+
+
+@app.route("/predict", methods=["POST"])def predict():
+    data = [float(x) for x in request.form.values()]
+    prediction = rf_model.predict([data])[0]
+    return render_template("result.html", prediction=prediction)
