@@ -1,0 +1,8 @@
+from lime.lime_tabular import LimeTabularExplainer
+
+explainer = LimeTabularExplainer(
+    X_train.values,
+    feature_names=X_train.columns,
+    class_names=["No Risk", "At Risk"],
+    mode="classification"
+)
